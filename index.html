@@ -165,6 +165,29 @@
     color:#fff;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(10,110,209,.4);font-size:20px;display:none;z-index:40}
   .toTop.show{display:block}
 
+  /* Intro animation overlay */
+  #intro{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 42%,#ffffff 0%,#EAF3FB 68%,#D3E6F7 100%);
+    transition:opacity .6s ease}
+  #intro.hide{opacity:0}
+  .intro-stage{display:flex;flex-direction:column;align-items:center;gap:18px}
+  #introImg{width:172px;height:202px;object-fit:cover;object-position:top center;border-radius:18px;
+    border:3px solid #fff;box-shadow:0 18px 50px rgba(10,30,60,.28);
+    animation:introZoom 2.6s cubic-bezier(.45,.05,.2,1) both}
+  .intro-name{font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--ink);opacity:0;
+    animation:introName .7s ease 1.7s both}
+  @keyframes introZoom{
+    0%{transform:scale(.82);opacity:0}
+    14%{opacity:1}
+    46%{transform:scale(1.5);opacity:1}
+    82%{transform:scale(1);opacity:1}
+    100%{transform:scale(1);opacity:1}
+  }
+  @keyframes introName{to{opacity:1}}
+  @media(prefers-reduced-motion:reduce){
+    #introImg{animation:none}.intro-name{animation:none;opacity:1}
+  }
+
   @media(max-width:920px){
     .grid-2,.swot,.teams{grid-template-columns:1fr}
     .grid-3,.grid-4{grid-template-columns:repeat(2,1fr)}
@@ -176,6 +199,13 @@
 </style>
 </head>
 <body>
+
+<div id="intro">
+  <div class="intro-stage">
+    <img id="introImg" alt="" />
+    <div class="intro-name">Marwan Abdallah</div>
+  </div>
+</div>
 
 <header class="topbar">
   <div class="topbar-inner">
@@ -439,6 +469,30 @@
 <button class="toTop" id="toTop" aria-label="Back to top">&#8593;</button>
 
 <script>
+  // Always start at the very top (prevents opening at the bottom)
+  if('scrollRestoration' in history){ history.scrollRestoration='manual'; }
+  window.scrollTo(0,0);
+  document.documentElement.style.overflow='hidden';
+  document.body.style.overflow='hidden';
+
+  // Intro: zoom into photo, zoom out, then reveal the page (at top)
+  window.addEventListener('load',()=>{
+    window.scrollTo(0,0);
+    const intro=document.getElementById('intro');
+    const introImg=document.getElementById('introImg');
+    const hero=document.querySelector('.hero .avatar');
+    if(introImg && hero){ introImg.src=hero.currentSrc||hero.src; }
+    const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const wait=reduce?300:2700;
+    setTimeout(()=>{
+      intro.classList.add('hide');
+      document.documentElement.style.overflow='';
+      document.body.style.overflow='';
+      window.scrollTo(0,0);
+      setTimeout(()=>{ intro.style.display='none'; window.scrollTo(0,0); },650);
+    },wait);
+  });
+
   const links=[...document.querySelectorAll('#nav a')];
   const map={};
   links.forEach(a=>{const id=a.getAttribute('href').slice(1);const el=document.getElementById(id);if(el)map[id]=a;});
